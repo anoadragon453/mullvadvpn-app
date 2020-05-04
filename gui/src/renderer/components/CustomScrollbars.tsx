@@ -86,6 +86,10 @@ export default class CustomScrollbars extends React.Component<IProps, IState> {
     }
   }
 
+  public scrollElementIntoView(child: HTMLElement, options: ScrollIntoViewOptions) {
+    child.scrollIntoView(options);
+  }
+
   public getScrollPosition(): [number, number] {
     const scroll = this.scrollableRef.current;
     if (scroll) {

@@ -17,6 +17,7 @@ interface IProps {
   expanded: boolean;
   onSelect?: (location: RelayLocation) => void;
   onExpand?: (location: RelayLocation, value: boolean) => void;
+  scrollToComponent?: (component: React.ReactInstance) => void;
   children?: CityRowElement | CityRowElement[];
 }
 
@@ -32,6 +33,8 @@ const styles = {
 };
 
 export default class CountryRow extends Component<IProps> {
+  private ref = React.createRef<View>();
+
   public static compareProps(oldProps: IProps, nextProps: IProps) {
     if (React.Children.count(oldProps.children) !== React.Children.count(nextProps.children)) {
       return false;
@@ -76,7 +79,7 @@ export default class CountryRow extends Component<IProps> {
     const hasChildren = numChildren > 1 || numOnlyChildChildren > 1;
 
     return (
-      <View style={styles.container}>
+      <View ref={this.ref} style={styles.container}>
         <Cell.CellButton
           style={styles.base}
           onPress={this.handlePress}
@@ -92,21 +95,27 @@ export default class CountryRow extends Component<IProps> {
           ) : null}
         </Cell.CellButton>
 
-        {hasChildren && <Accordion expanded={this.props.expanded}>{this.props.children}</Accordion>}
+        {hasChildren && (
+          <Accordion expanded={this.props.expanded} onTransitionEnd={this.onTransitionEnd}>
+            {this.props.children}
+          </Accordion>
+        )}
       </View>
     );
   }
 
   private toggleCollapse = (event: Types.SyntheticEvent) => {
-    if (this.props.onExpand) {
-      this.props.onExpand(this.props.location, !this.props.expanded);
-    }
+    this.props.onExpand?.(this.props.location, !this.props.expanded);
     event.stopPropagation();
   };
 
   private handlePress = () => {
-    if (this.props.onSelect) {
-      this.props.onSelect(this.props.location);
+    this.props.onSelect?.(this.props.location);
+  };
+
+  private onTransitionEnd = () => {
+    if (this.props.expanded && this.ref.current) {
+      this.props.scrollToComponent?.(this.ref.current);
     }
   };
 }

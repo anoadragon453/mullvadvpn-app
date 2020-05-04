@@ -21,6 +21,7 @@ interface IBridgeLocationsProps {
   selectedValue?: LiftedConstraint<RelayLocation>;
   selectedElementRef?: React.Ref<React.ReactInstance>;
   onSelect?: (value: LocationSelection<SpecialBridgeLocationType>) => void;
+  scrollToComponent: (element: React.ReactInstance) => void;
 }
 
 const BridgeLocations = React.forwardRef(function BridgeLocationsT(
@@ -41,7 +42,8 @@ const BridgeLocations = React.forwardRef(function BridgeLocationsT(
       defaultExpandedLocations={props.defaultExpandedLocations}
       selectedValue={selectedValue}
       selectedElementRef={props.selectedElementRef}
-      onSelect={props.onSelect}>
+      onSelect={props.onSelect}
+      scrollToComponent={props.scrollToComponent}>
       <SpecialLocations>
         <SpecialLocation
           icon={SpecialLocationIcon.geoLocation}

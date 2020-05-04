@@ -18,6 +18,7 @@ interface IProps {
   expanded: boolean;
   onSelect?: (location: RelayLocation) => void;
   onExpand?: (location: RelayLocation, value: boolean) => void;
+  scrollToComponent?: (component: React.ReactInstance) => void;
   children?: RelayRowElement | RelayRowElement[];
 }
 
@@ -30,6 +31,8 @@ const styles = {
 };
 
 export default class CityRow extends Component<IProps> {
+  private ref = React.createRef<View>();
+
   public static compareProps(oldProps: IProps, nextProps: IProps): boolean {
     if (React.Children.count(oldProps.children) !== React.Children.count(nextProps.children)) {
       return false;
@@ -68,7 +71,7 @@ export default class CityRow extends Component<IProps> {
     const hasChildren = React.Children.count(this.props.children) > 1;
 
     return (
-      <View>
+      <View ref={this.ref}>
         <Cell.CellButton
           onPress={this.handlePress}
           disabled={!this.props.hasActiveRelays}
@@ -83,21 +86,28 @@ export default class CityRow extends Component<IProps> {
           {hasChildren && <ChevronButton onPress={this.toggleCollapse} up={this.props.expanded} />}
         </Cell.CellButton>
 
-        {hasChildren && <Accordion expanded={this.props.expanded}>{this.props.children}</Accordion>}
+        {hasChildren && (
+          <Accordion expanded={this.props.expanded} onTransitionEnd={this.onTransitionEnd}>
+            {this.props.children}
+          </Accordion>
+        )}
       </View>
     );
   }
 
   private toggleCollapse = (event: Types.SyntheticEvent) => {
-    if (this.props.onExpand) {
-      this.props.onExpand(this.props.location, !this.props.expanded);
-    }
+    this.props.onExpand?.(this.props.location, !this.props.expanded);
     event.stopPropagation();
   };
 
   private handlePress = () => {
-    if (this.props.onSelect) {
-      this.props.onSelect(this.props.location);
+    this.props.onSelect?.(this.props.location);
+  };
+
+  private onTransitionEnd = (event: React.TransitionEvent) => {
+    event.stopPropagation();
+    if (this.props.expanded && this.ref.current) {
+      this.props.scrollToComponent?.(this.ref.current);
     }
   };
 }

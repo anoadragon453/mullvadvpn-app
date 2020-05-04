@@ -32,6 +32,7 @@ interface ILocationListProps<SpecialValueType> {
   selectedValue?: LocationSelection<SpecialValueType>;
   selectedElementRef?: React.Ref<React.ReactInstance>;
   onSelect?: (value: LocationSelection<SpecialValueType>) => void;
+  scrollToComponent: (component: React.ReactInstance) => void;
 }
 
 export default class LocationList<SpecialValueType> extends Component<
@@ -89,6 +90,7 @@ export default class LocationList<SpecialValueType> extends Component<
                 selectedElementRef: this.onSpecialLocationRef,
                 selectedValue: specialSelection,
                 onSelect: this.onSelectSpecialLocation,
+                scrollToComponent: this.props.scrollToComponent,
               });
             } else if (child.type === RelayLocations) {
               return React.cloneElement(child, {
@@ -98,6 +100,7 @@ export default class LocationList<SpecialValueType> extends Component<
                 expandedItems: this.state.expandedLocations,
                 onSelect: this.onSelectRelayLocation,
                 onExpand: this.onExpandRelayLocation,
+                scrollToComponent: this.props.scrollToComponent,
               });
             }
           }
@@ -246,6 +249,7 @@ interface IRelayLocationsProps {
   expandedItems?: RelayLocation[];
   onSelect?: (location: RelayLocation) => void;
   onExpand?: (location: RelayLocation, expand: boolean) => void;
+  scrollToComponent?: (component: React.ReactInstance) => void;
 }
 
 interface ICommonCellProps<T> {
@@ -268,7 +272,8 @@ export class RelayLocations extends Component<IRelayLocationsProps> {
               hasActiveRelays={relayCountry.hasActiveRelays}
               expanded={this.isExpanded(countryLocation)}
               onSelect={this.handleSelection}
-              onExpand={this.handleExpand}
+              onExpand={this.props.onExpand}
+              scrollToComponent={this.props.scrollToComponent}
               {...this.getCommonCellProps<CountryRow>(countryLocation)}>
               {relayCountry.cities.map((relayCity) => {
                 const cityLocation: RelayLocation = {
@@ -282,7 +287,8 @@ export class RelayLocations extends Component<IRelayLocationsProps> {
                     hasActiveRelays={relayCity.hasActiveRelays}
                     expanded={this.isExpanded(cityLocation)}
                     onSelect={this.handleSelection}
-                    onExpand={this.handleExpand}
+                    onExpand={this.props.onExpand}
+                    scrollToComponent={this.props.scrollToComponent}
                     {...this.getCommonCellProps<CityRow>(cityLocation)}>
                     {relayCity.relays.map((relay) => {
                       const relayLocation: RelayLocation = {
@@ -324,12 +330,6 @@ export class RelayLocations extends Component<IRelayLocationsProps> {
       if (this.props.onSelect) {
         this.props.onSelect(location);
       }
-    }
-  };
-
-  private handleExpand = (location: RelayLocation, expand: boolean) => {
-    if (this.props.onExpand) {
-      this.props.onExpand(location, expand);
     }
   };
 

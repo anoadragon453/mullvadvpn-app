@@ -4,6 +4,7 @@ import styled from 'styled-components';
 interface IProps {
   expanded: boolean;
   animationDuration: number;
+  onTransitionEnd?: (event: React.TransitionEvent) => void;
   children?: React.ReactNode;
 }
 
@@ -84,10 +85,12 @@ export default class Accordion extends React.Component<IProps, IState> {
     return (this.containerRef.current?.scrollHeight ?? 0) + 'px';
   }
 
-  private onTransitionEnd = () => {
+  private onTransitionEnd = (event: React.TransitionEvent) => {
     if (this.props.expanded) {
       // Height auto enables the container to grow if the content changes size
       this.setState({ containerHeight: 'auto' });
     }
+
+    this.props.onTransitionEnd?.(event);
   };
 }

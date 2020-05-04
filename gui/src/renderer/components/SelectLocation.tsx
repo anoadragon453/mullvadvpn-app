@@ -137,6 +137,7 @@ export default class SelectLocation extends Component<IProps> {
                         selectedValue={this.props.selectedExitLocation}
                         selectedElementRef={this.selectedExitLocationRef}
                         onSelect={this.onSelectExitLocation}
+                        scrollToComponent={this.scrollToComponent}
                       />
                     ) : (
                       <BridgeLocations
@@ -146,6 +147,7 @@ export default class SelectLocation extends Component<IProps> {
                         selectedValue={this.props.selectedBridgeLocation}
                         selectedElementRef={this.selectedBridgeLocationRef}
                         onSelect={this.onSelectBridgeLocation}
+                        scrollToComponent={this.scrollToComponent}
                       />
                     )}
                   </View>
@@ -178,10 +180,7 @@ export default class SelectLocation extends Component<IProps> {
   }
 
   private scrollToPosition(x: number, y: number) {
-    const scrollView = this.scrollView.current;
-    if (scrollView) {
-      scrollView.scrollTo(x, y);
-    }
+    this.scrollView.current?.scrollTo(x, y);
   }
 
   private scrollToSelectedCell() {
@@ -202,6 +201,16 @@ export default class SelectLocation extends Component<IProps> {
       }
     }
   }
+
+  private scrollToComponent = (element: React.ReactInstance) => {
+    const elementDOMNode = ReactDOM.findDOMNode(element);
+    if (elementDOMNode instanceof HTMLElement) {
+      this.scrollView.current?.scrollElementIntoView(elementDOMNode, {
+        behavior: 'smooth',
+        block: 'nearest',
+      });
+    }
+  };
 
   private onSelectExitLocation = (location: LocationSelection<never>) => {
     if (location.type === LocationSelectionType.relay) {
