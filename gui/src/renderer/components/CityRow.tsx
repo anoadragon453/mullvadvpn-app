@@ -1,4 +1,5 @@
 import * as React from 'react';
+import ReactDOM from 'react-dom';
 import { Component, Styles, Types, View } from 'reactxp';
 import { colors } from '../../config.json';
 import { compareRelayLocation, RelayLocation } from '../../shared/daemon-rpc-types';
@@ -18,7 +19,7 @@ interface IProps {
   expanded: boolean;
   onSelect?: (location: RelayLocation) => void;
   onExpand?: (location: RelayLocation, value: boolean) => void;
-  scrollToComponent?: (component: React.ReactInstance) => void;
+  cb?: (...args: any[]) => void;
   children?: RelayRowElement | RelayRowElement[];
 }
 
@@ -32,6 +33,8 @@ const styles = {
 
 export default class CityRow extends Component<IProps> {
   private ref = React.createRef<View>();
+  private contentRef = React.createRef<HTMLDivElement>();
+  private buttonRef = React.createRef<Cell.CellButton>();
 
   public static compareProps(oldProps: IProps, nextProps: IProps): boolean {
     if (React.Children.count(oldProps.children) !== React.Children.count(nextProps.children)) {
@@ -73,6 +76,7 @@ export default class CityRow extends Component<IProps> {
     return (
       <View ref={this.ref}>
         <Cell.CellButton
+          ref={this.buttonRef}
           onPress={this.handlePress}
           disabled={!this.props.hasActiveRelays}
           selected={this.props.selected}
@@ -88,7 +92,9 @@ export default class CityRow extends Component<IProps> {
 
         {hasChildren && (
           <Accordion expanded={this.props.expanded} onTransitionEnd={this.onTransitionEnd}>
-            {this.props.children}
+            <div ref={this.contentRef}>
+              {this.props.children}
+            </div>
           </Accordion>
         )}
       </View>
@@ -97,6 +103,12 @@ export default class CityRow extends Component<IProps> {
 
   private toggleCollapse = (event: Types.SyntheticEvent) => {
     this.props.onExpand?.(this.props.location, !this.props.expanded);
+    if (!this.props.expanded) {
+      this.props.cb?.(
+        this.contentRef.current!,
+        ReactDOM.findDOMNode(this.buttonRef.current!) as HTMLElement
+      );
+    }
     event.stopPropagation();
   };
 
@@ -106,8 +118,8 @@ export default class CityRow extends Component<IProps> {
 
   private onTransitionEnd = (event: React.TransitionEvent) => {
     event.stopPropagation();
-    if (this.props.expanded && this.ref.current) {
-      this.props.scrollToComponent?.(this.ref.current);
-    }
+    // if (this.props.expanded && this.ref.current) {
+    //   this.props.cb?.(this.ref.current);
+    // }
   };
 }

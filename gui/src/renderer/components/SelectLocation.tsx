@@ -137,7 +137,7 @@ export default class SelectLocation extends Component<IProps> {
                         selectedValue={this.props.selectedExitLocation}
                         selectedElementRef={this.selectedExitLocationRef}
                         onSelect={this.onSelectExitLocation}
-                        scrollToComponent={this.scrollToComponent}
+                        cb={this.cb}
                       />
                     ) : (
                       <BridgeLocations
@@ -147,7 +147,7 @@ export default class SelectLocation extends Component<IProps> {
                         selectedValue={this.props.selectedBridgeLocation}
                         selectedElementRef={this.selectedBridgeLocationRef}
                         onSelect={this.onSelectBridgeLocation}
-                        scrollToComponent={this.scrollToComponent}
+                        cb={this.cb}
                       />
                     )}
                   </View>
@@ -202,12 +202,35 @@ export default class SelectLocation extends Component<IProps> {
     }
   }
 
-  private scrollToComponent = (element: React.ReactInstance) => {
-    const elementDOMNode = ReactDOM.findDOMNode(element);
-    if (elementDOMNode instanceof HTMLElement) {
-      this.scrollView.current?.scrollElementIntoView(elementDOMNode, {
-        behavior: 'smooth',
-        block: 'nearest',
+  private cb = (...[content, button]: any[]) => {
+    const contentHeight = content.offsetHeight;
+    const buttonHeight = button.offsetHeight;
+    // @ts-ignore
+    const scrollOffsetTop = this.scrollView.current!.scrollableRef.current!.getBoundingClientRect().y;
+    const buttonTop = button.getBoundingClientRect().y - scrollOffsetTop;
+    // @ts-ignore
+    const scrollTop = this.scrollView.current!.scrollableRef.current!.scrollTop;
+    // @ts-ignore
+    const scrollStart = this.scrollView.current!.scrollableRef.current!.scrollHeight;
+    // @ts-ignore
+    const scrollOffsetHeight = this.scrollView.current!.scrollableRef.current!.offsetHeight;
+    const scrollEnd = scrollStart + scrollOffsetHeight;
+
+    if (buttonTop + buttonHeight + contentHeight > scrollOffsetHeight) {
+      // @ts-ignore
+      this.scrollView.current!.scrollableRef.current!.style.paddingBottom = contentHeight + 'px';
+      setTimeout(() => {
+        // @ts-ignore
+        this.scrollView.current!.scrollableRef.current!.style.paddingBottom = 0;
+      }, 350);
+
+      const toBottom = scrollStart + buttonTop + buttonHeight + contentHeight - scrollEnd;
+      setTimeout(() => {
+        // @ts-ignore
+        this.scrollView.current!.scrollableRef.current!.scrollBy({
+          top: Math.min(toBottom, buttonTop),
+          behavior: 'smooth' },
+        );
       });
     }
   };

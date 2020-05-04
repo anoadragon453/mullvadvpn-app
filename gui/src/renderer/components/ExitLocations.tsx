@@ -13,7 +13,7 @@ interface IExitLocationsProps {
   selectedValue?: RelayLocation;
   selectedElementRef?: React.Ref<React.ReactInstance>;
   onSelect?: (value: LocationSelection<never>) => void;
-  scrollToComponent: (element: React.ReactInstance) => void;
+  cb: (...args: any[]) => void;
 }
 
 const ExitLocations = React.forwardRef(function ExitLocationsT(
@@ -31,7 +31,7 @@ const ExitLocations = React.forwardRef(function ExitLocationsT(
       selectedValue={selectedValue}
       selectedElementRef={props.selectedElementRef}
       onSelect={props.onSelect}
-      scrollToComponent={props.scrollToComponent}>
+      cb={props.cb}>
       <RelayLocations source={props.source} />
     </LocationList>
   );

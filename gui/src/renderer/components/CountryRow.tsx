@@ -1,4 +1,5 @@
 import * as React from 'react';
+import ReactDOM from 'react-dom';
 import { Component, Styles, Types, View } from 'reactxp';
 import { compareRelayLocation, RelayLocation } from '../../shared/daemon-rpc-types';
 import Accordion from './Accordion';
@@ -17,7 +18,7 @@ interface IProps {
   expanded: boolean;
   onSelect?: (location: RelayLocation) => void;
   onExpand?: (location: RelayLocation, value: boolean) => void;
-  scrollToComponent?: (component: React.ReactInstance) => void;
+  cb?: (...args: any[]) => void;
   children?: CityRowElement | CityRowElement[];
 }
 
@@ -34,6 +35,8 @@ const styles = {
 
 export default class CountryRow extends Component<IProps> {
   private ref = React.createRef<View>();
+  private contentRef = React.createRef<HTMLDivElement>();
+  private buttonRef = React.createRef<Cell.CellButton>();
 
   public static compareProps(oldProps: IProps, nextProps: IProps) {
     if (React.Children.count(oldProps.children) !== React.Children.count(nextProps.children)) {
@@ -81,6 +84,7 @@ export default class CountryRow extends Component<IProps> {
     return (
       <View ref={this.ref} style={styles.container}>
         <Cell.CellButton
+          ref={this.buttonRef}
           style={styles.base}
           onPress={this.handlePress}
           disabled={!this.props.hasActiveRelays}
@@ -97,7 +101,9 @@ export default class CountryRow extends Component<IProps> {
 
         {hasChildren && (
           <Accordion expanded={this.props.expanded} onTransitionEnd={this.onTransitionEnd}>
-            {this.props.children}
+            <div ref={this.contentRef}>
+              {this.props.children}
+            </div>
           </Accordion>
         )}
       </View>
@@ -106,6 +112,12 @@ export default class CountryRow extends Component<IProps> {
 
   private toggleCollapse = (event: Types.SyntheticEvent) => {
     this.props.onExpand?.(this.props.location, !this.props.expanded);
+    if (!this.props.expanded) {
+      this.props.cb?.(
+        this.contentRef.current!,
+        ReactDOM.findDOMNode(this.buttonRef.current!) as HTMLElement
+      );
+    }
     event.stopPropagation();
   };
 
@@ -114,8 +126,8 @@ export default class CountryRow extends Component<IProps> {
   };
 
   private onTransitionEnd = () => {
-    if (this.props.expanded && this.ref.current) {
-      this.props.scrollToComponent?.(this.ref.current);
-    }
+    // if (this.props.expanded && this.ref.current) {
+    //   this.props.cb?.(this.ref.current);
+    // }
   };
 }

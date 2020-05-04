@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { Suspense } from 'react';
 import styled from 'styled-components';
 
 interface IProps {
@@ -9,7 +9,6 @@ interface IProps {
 }
 
 interface IState {
-  mountChildren: boolean;
   containerHeight: string;
 }
 
@@ -36,7 +35,6 @@ export default class Accordion extends React.Component<IProps, IState> {
   };
 
   public state: IState = {
-    mountChildren: this.props.expanded,
     containerHeight: this.props.expanded ? 'auto' : '0',
   };
 
@@ -55,20 +53,15 @@ export default class Accordion extends React.Component<IProps, IState> {
         height={this.state.containerHeight}
         animationDuration={this.props.animationDuration}
         onTransitionEnd={this.onTransitionEnd}>
-        <Content>{this.state.mountChildren && this.props.children}</Content>
+        <Content>
+          <Suspense fallback={() => null}>{this.props.children}</Suspense>
+        </Content>
       </Container>
     );
   }
 
   private expand() {
-    // Make sure the children are mounted first before expanding the accordion
-    if (!this.state.mountChildren) {
-      this.setState({ mountChildren: true }, () => {
-        this.setState({ containerHeight: this.getContentHeight() });
-      });
-    } else {
-      this.setState({ containerHeight: this.getContentHeight() });
-    }
+    this.setState({ containerHeight: this.getContentHeight() });
   }
 
   private collapse() {
